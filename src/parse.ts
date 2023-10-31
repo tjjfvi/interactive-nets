@@ -5,8 +5,8 @@ export type Tokens = {
   peek(): string | undefined
 }
 
-const rIdent = /^[a-z0-9_.'-]+$/
-const rToken = /\s*([{}()[\]*=]|\w+)\s*|(.)/g
+const rIdent = /^[a-zA-Z0-9_.'-]+$/
+const rToken = /\s*([{}()[\]*=]|[a-zA-Z0-9_.'-]+)\s*|(.)/g
 
 function lex(input: string): Tokens {
   const iter = _lex(input)
@@ -81,6 +81,10 @@ export function parseNet(input: string): Net {
     if (tokens.next() !== "=") throw new Error("expected =")
     const b = parseTree(tokens, w)
     pairs.push([a, b])
+  }
+  const unmatched = Object.keys(w)
+  if (unmatched.length) {
+    throw new Error(`unmatched ${unmatched.join(", ")}`)
   }
   return [trees, pairs]
 }

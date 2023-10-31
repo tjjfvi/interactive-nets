@@ -28,6 +28,8 @@
   "exclude": ["./deps/_/libp2p/"],
   "tasks": {
     "star": "deno task run _tasks/star.ts && deno check target/star.ts",
-    "moderate": "deno task run https://deno.land/x/moderate@0.0.5/mod.ts && dprint fmt"
+    "moderate": "deno task run https://deno.land/x/moderate@0.0.5/mod.ts && dprint fmt",
+    "build": "deno bundle --no-check src/main.ts static/main.js",
+    "dev": "DEV=1 deno run -A --watch=src/ server.ts"
   }
 }

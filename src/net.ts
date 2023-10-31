@@ -89,8 +89,5 @@ export function reduce([a, b]: Pair): Pair[] {
 }
 
 function pairLabel(x: Tree, y: Tree) {
-  if (x.label && y.label && x.label !== y.label) {
-    return x.label + "_" + y.label
-  }
-  return x.label || y.label || ""
+  return y.label || x.label || ""
 }

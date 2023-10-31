@@ -26,13 +26,13 @@ function strafe(delta: number) {
   }
   if (delta > 0) {
     return [
-      " \\" + " _".repeat(delta / 2 - 2) + "   ",
+      " \\" + "__".repeat(delta / 2 - 2) + "_  ",
       spacing.slice(0, -1) + "\\ ",
       spacing + "|",
     ]
   }
   return [
-    "   " + "_ ".repeat(-delta / 2 - 2) + "/ ",
+    "  _" + "__".repeat(-delta / 2 - 2) + "/ ",
     " /" + spacing.slice(0, -1),
     "|" + spacing,
   ]
@@ -50,26 +50,33 @@ function spacing(gap: number) {
   return [" ".repeat(gap)]
 }
 
-const con = [
-  "  / \\  ",
-  " /   \\ ",
-  "/_____\\",
-  " |   | ",
-]
-
-const dup = [
-  "  /X\\  ",
-  " /XXX\\ ",
-  "/XXXXX\\",
-  " |   | ",
-]
-
-const dup2 = [
-  "  /+\\  ",
-  " /+++\\ ",
-  "/+++++\\",
-  " |   | ",
-]
+function ctr(tag: number) {
+  if (tag === 0) {
+    return [
+      "  / \\  ",
+      " /   \\ ",
+      "/_____\\",
+      " |   | ",
+    ]
+  }
+  if (tag < 8) {
+    const char = " X-+!*&@"[tag]!
+    return [
+      `  /${char}\\  `,
+      ` /${char.repeat(3)}\\ `,
+      `/${char.repeat(5)}\\`,
+      " |   | ",
+    ]
+  }
+  const hex = tag.toString(16)
+  const center = [, ` ${hex} `, hex[0] + " " + hex[1], hex][hex.length]
+  return [
+    "  / \\  ",
+    ` /${center}\\ `,
+    "/_____\\",
+    " |   | ",
+  ]
+}
 
 const era = [
   "_|_",
@@ -85,7 +92,7 @@ function drawTree(tree: Tree, left = 0): [Diagram, number, [Aux, number][]] {
     [
       ...concatHoriz(
         spacing(a[0]!.length - 3),
-        [con, dup, dup2][tree.tag]!,
+        ctr(tree.tag),
         spacing(b[0]!.length - 3),
       ),
       ...concatHoriz(
@@ -105,7 +112,7 @@ function drawTree(tree: Tree, left = 0): [Diagram, number, [Aux, number][]] {
 function cap(delta: number) {
   if (delta < 4 || delta % 2 !== 0) throw new Error("invalid cup delta")
   return [
-    "  " + " _".repeat((delta - 4) / 2) + "   ",
+    "  " + "__".repeat((delta - 4) / 2) + "_  ",
     " /" + " ".repeat(delta - 3) + "\\ ",
     "|" + " ".repeat(delta - 1) + "|",
   ]
@@ -148,15 +155,16 @@ export function drawNet(net: Net): Diagram {
     for (const [deltaI, left] of jumps) {
       const line = active ? "_" : " "
       const piece = deltaI === d
-        ? `${line} \\`
+        ? `${line}${line}\\`
         : deltaI === -d
-        ? `/ ${active > 1 ? "_" : " "}`
+        ? `/${active > 1 ? "__" : "  "}`
         : Math.abs(deltaI) > d
         ? `${line}|${line}`
-        : `${line} ${line}`
-      str += (active ? "_ " : "  ").repeat((left - 1 - i) / 2) + piece + " "
+        : `${line}${line}${line}`
+      str += (active ? "__" : "  ").repeat((left - 1 - i) / 2) + piece
       i = left + 3
       active += deltaI === d ? 1 : deltaI === -d ? -1 : 0
+      str += active ? "_" : " "
     }
     if (str.trim() === "") break
     if (/^[ |]+$/.test(str)) continue

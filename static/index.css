@@ -1,0 +1,14 @@
+
+body, textarea {
+  background: #151820;
+  color: #bdc3c7;
+}
+
+textarea {
+  width: 80em;
+  height: 30em;
+}
+
+#output {
+  font-size: 8px;
+}
