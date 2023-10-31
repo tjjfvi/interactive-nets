@@ -1,5 +1,5 @@
 import { printNet } from "./diagram.ts"
-import { con, dup, Net, reduce, wires } from "./net.ts"
+import { con, dup, dup2, Net, reduce, wires } from "./net.ts"
 
 const w = wires()
 
@@ -11,10 +11,10 @@ const add = con(
 const one = con(con(w.z!, con(w.z!, w.o!)), w.o!)
 
 const net: Net = [
-  [w.t!],
+  [w.u!],
   [
-    [one, dup(w.o1!, w.o2!)],
-    [add, con(con(w.o1!, w.o2!), w.t!)],
+    [one, dup(w.o1!, dup(w.o2!, w.o3!))],
+    [add, dup2(con(con(w.o1!, w.o2!), w.t!), con(con(w.t!, w.o3!), w.u!))],
   ],
 ]
 

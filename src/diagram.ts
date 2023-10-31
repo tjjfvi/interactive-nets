@@ -64,6 +64,13 @@ const dup = [
   " |   | ",
 ]
 
+const dup2 = [
+  "  /+\\  ",
+  " /+++\\ ",
+  "/+++++\\",
+  " |   | ",
+]
+
 const era = [
   "_|_",
   "   ",
@@ -76,7 +83,11 @@ function printTree(tree: Tree, left = 0): [Diagram, number, [Aux, number][]] {
   const [b, bi, bu] = printTree(tree.right, left + a[0]!.length + 1)
   return [
     [
-      ...concatHoriz(spacing(a[0]!.length - 3), tree.tag ? dup : con, spacing(b[0]!.length - 3)),
+      ...concatHoriz(
+        spacing(a[0]!.length - 3),
+        [con, dup, dup2][tree.tag]!,
+        spacing(b[0]!.length - 3),
+      ),
       ...concatHoriz(
         spacing(ai),
         strafe(-(a[0]!.length - ai - 2)),

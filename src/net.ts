@@ -12,6 +12,10 @@ export function dup(a: Tree, b: Tree): Tree {
   return { type: "two", tag: 1, left: a, right: b }
 }
 
+export function dup2(a: Tree, b: Tree): Tree {
+  return { type: "two", tag: 2, left: a, right: b }
+}
+
 export function wire(): [Aux, Aux] {
   const x: Tree = { type: "aux", other: null! }
   const y: Tree = { type: "aux", other: x }
