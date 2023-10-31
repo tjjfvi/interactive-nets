@@ -1,24 +1,27 @@
-export type Aux = { type: "aux"; other: Aux }
+export type Aux = { type: "aux"; other: Aux; label: string }
 
-export type Tree = { type: "nil" } | { type: "two"; tag: number; left: Tree; right: Tree } | Aux
+export type Tree =
+  | { type: "nil"; label?: undefined }
+  | { type: "two"; tag: number; left: Tree; right: Tree; label?: undefined }
+  | Aux
 
 export const nil = { type: "nil" as const }
 
 export function con(a: Tree, b: Tree): Tree {
-  return { type: "two", tag: 0, left: a, right: b }
+  return ctr(0, a, b)
 }
 
 export function dup(a: Tree, b: Tree): Tree {
-  return { type: "two", tag: 1, left: a, right: b }
+  return ctr(1, a, b)
 }
 
-export function dup2(a: Tree, b: Tree): Tree {
-  return { type: "two", tag: 2, left: a, right: b }
+export function ctr(tag: number, a: Tree, b: Tree): Tree {
+  return { type: "two", tag, left: a, right: b }
 }
 
-export function wire(): [Aux, Aux] {
-  const x: Tree = { type: "aux", other: null! }
-  const y: Tree = { type: "aux", other: x }
+export function wire(label: string): [Aux, Aux] {
+  const x: Tree = { type: "aux", other: null!, label }
+  const y: Tree = { type: "aux", other: x, label }
   x.other = y
   return [x, y]
 }
@@ -31,7 +34,7 @@ export function wires(): Record<string, Aux> {
         delete target[key]
         return v
       }
-      const [a, b] = wire()
+      const [a, b] = wire(key as string)
       target[key] = b
       return a
     },
@@ -47,6 +50,7 @@ export function reduce([a, b]: Pair): Pair[] {
     if (b.type === "aux") {
       a.other.other = b.other
       b.other.other = a.other
+      a.other.label = b.other.label = pairLabel(a, b)
     } else {
       delete (a.other as any).other
       Object.assign(a.other, b)
@@ -70,11 +74,23 @@ export function reduce([a, b]: Pair): Pair[] {
   if (a.tag === b.tag) {
     return [[a.left, b.left], [a.right, b.right]]
   }
-  const [[i, I], [j, J], [k, K], [l, L]] = [wire(), wire(), wire(), wire()]
-  return [
-    [a.left, { type: "two", tag: b.tag, left: k, right: l }],
-    [a.right, { type: "two", tag: b.tag, left: i, right: j }],
-    [{ type: "two", tag: a.tag, left: K, right: I }, b.left],
-    [{ type: "two", tag: a.tag, left: L, right: J }, b.right],
+  const [[Ll, lL], [Lr, lR], [Rl, rL], [Rr, rR]] = [
+    wire(pairLabel(a.left, b.left)),
+    wire(pairLabel(a.left, b.right)),
+    wire(pairLabel(a.right, b.left)),
+    wire(pairLabel(a.right, b.right)),
   ]
+  return [
+    [a.left, { type: "two", tag: b.tag, left: Ll, right: Lr }],
+    [a.right, { type: "two", tag: b.tag, left: Rl, right: Rr }],
+    [{ type: "two", tag: a.tag, left: lL, right: rL }, b.left],
+    [{ type: "two", tag: a.tag, left: lR, right: rR }, b.right],
+  ]
+}
+
+function pairLabel(x: Tree, y: Tree) {
+  if (x.label && y.label && x.label !== y.label) {
+    return x.label + "_" + y.label
+  }
+  return x.label || y.label || ""
 }

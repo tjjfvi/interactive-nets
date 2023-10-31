@@ -38,7 +38,7 @@ function strafe(delta: number) {
   ]
 }
 
-function concatHoriz(...ds: Diagram[]) {
+export function concatHoriz(...ds: Diagram[]) {
   return ds.reduce((a, b) => {
     if (a.length > b.length) b = [...b, ...Array(a.length - b.length).fill(b.at(-1) ?? "")]
     if (b.length > a.length) a = [...a, ...Array(b.length - a.length).fill(a.at(-1) ?? "")]
@@ -76,11 +76,11 @@ const era = [
   "   ",
 ]
 
-function printTree(tree: Tree, left = 0): [Diagram, number, [Aux, number][]] {
+function drawTree(tree: Tree, left = 0): [Diagram, number, [Aux, number][]] {
   if (tree.type === "aux") return [[" | "], 1, [[tree, left + 1]]]
   if (tree.type === "nil") return [era, 1, []]
-  const [a, ai, au] = printTree(tree.left, left)
-  const [b, bi, bu] = printTree(tree.right, left + a[0]!.length + 1)
+  const [a, ai, au] = drawTree(tree.left, left)
+  const [b, bi, bu] = drawTree(tree.right, left + a[0]!.length + 1)
   return [
     [
       ...concatHoriz(
@@ -111,22 +111,22 @@ function cap(delta: number) {
   ]
 }
 
-export function printNet(net: Net): Diagram {
+export function drawNet(net: Net): Diagram {
   let caps = [""]
   let trees = [""]
   const auxes: [Aux, number][] = []
   let i = 0
   for (const tree of net[0]) {
-    const [a, ai, au] = printTree(tree, i)
+    const [a, ai, au] = drawTree(tree, i)
     i += a[0]!.length + 1
     trees = concatHoriz(trees, a, spacing(1))
     caps = concatHoriz(caps, spacing(ai), ["|"], spacing(a[0]!.length - ai))
     auxes.push(...au)
   }
   for (const pair of net[1]) {
-    const [a, ai, au] = printTree(pair[0], i)
+    const [a, ai, au] = drawTree(pair[0], i)
     i += a[0]!.length + 1
-    const [b, bi, bu] = printTree(pair[1], i)
+    const [b, bi, bu] = drawTree(pair[1], i)
     i += b[0]!.length + 1
     auxes.push(...au, ...bu)
     trees = concatHoriz(trees, a, spacing(1), b, spacing(1))
@@ -163,5 +163,5 @@ export function printNet(net: Net): Diagram {
     str += " ".repeat(caps[0]!.length - i)
     cups.push(str)
   }
-  return [...caps, ...trees, ...cups]
+  return [...caps, ...trees, ...cups, " ".repeat(caps[0]!.length)]
 }

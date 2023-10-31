@@ -1,26 +1,30 @@
-import { printNet } from "./diagram.ts"
-import { con, dup, dup2, Net, reduce, wires } from "./net.ts"
+import { concatHoriz, drawNet } from "./diagram.ts"
+import { reduce } from "./net.ts"
+import { parseNet } from "./parse.ts"
+import { printNet } from "./print.ts"
 
-const w = wires()
+const net = parseNet(`
+out
 
-const add = con(
-  con(con(con(w.z!, w.i0!), w.o0!), con(con(w.o0!, w.i1!), w.o1!)),
-  con(con(w.z!, dup(w.i0!, w.i1!)), w.o1!),
+add = (
+  (((z i0) o0) ((o0 i1) o1))
+  ((z [i0 i1]) o1)
 )
 
-const one = con(con(w.z!, con(w.z!, w.o!)), w.o!)
+one = ((z (z o)) o)
 
-const net: Net = [
-  [w.u!],
-  [
-    [one, dup(w.o1!, dup(w.o2!, w.o3!))],
-    [add, dup2(con(con(w.o1!, w.o2!), w.t!), con(con(w.t!, w.o3!), w.u!))],
-  ],
-]
+one = [one0 [one1 one2]]
+add = {2 add0 add1}
+
+add0 = ((one0 one1) two)
+add1 = ((two one2) three)
+
+out = three
+`)
 
 for (let i = 0; i < 1000; i++) {
   console.log("")
-  console.log(printNet(net).join("\n"))
+  console.log(concatHoriz(drawNet(net), [...printNet(net), ""]).join("\n"))
   if (!net[1].length) break
   net[1] = reduce(net[1][0]!).concat(net[1].slice(1))
 }
