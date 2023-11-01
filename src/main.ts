@@ -1,11 +1,12 @@
 /// <reference lib="dom"/>
 
+import lzstring from "https://esm.sh/lz-string@1.4.4"
 import { concatHoriz, drawNet } from "./diagram.ts"
 import { reduce } from "./net.ts"
 import { parseNet } from "./parse.ts"
 import { printNet } from "./print.ts"
 
-const initial = `
+const initial = getInitialNet() ?? `
 out
 
 add = (
@@ -39,8 +40,8 @@ autoSubst.addEventListener("change", exec)
 exec()
 
 function exec() {
-  let output = ""
   try {
+    let output = ""
     const net = parseNet(inputTextarea.value)
     let steps = 0
     for (; steps < 1000; steps++) {
@@ -60,10 +61,17 @@ function exec() {
       }
     }
 
-    output = `${steps} steps\n\n` + output
-  } catch (e) {
-    output = e + ""
-  }
+    outputPre.textContent = `${steps} steps\n\n` + output
 
-  outputPre.textContent = output
+    history.replaceState({}, "", "#0" + lzstring.compressToEncodedURIComponent(inputTextarea.value))
+  } catch (e) {
+    outputPre.textContent = e + ""
+  }
+}
+
+function getInitialNet(): string | undefined {
+  if (location.hash.startsWith("#0")) {
+    return lzstring.decompressFromEncodedURIComponent(location.hash.slice(2))
+  }
+  return
 }
